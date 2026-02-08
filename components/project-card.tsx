@@ -1,13 +1,18 @@
-import { Project } from "@prisma/client"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
 import { ExternalLink, Star, GitFork, Eye, Lock, Users } from "lucide-react"
 import Link from "next/link"
 
 interface ProjectCardProps {
-    project: any
-    currentUserId?: string
+    project: {
+        id: number
+        name: string
+        description?: string
+        githubUrl: string
+        language?: string
+        tags?: string[]
+        featured?: boolean
+    }
 }
 
 const visibilityConfig = {
@@ -31,27 +36,14 @@ const visibilityConfig = {
     },
 }
 
-export function ProjectCard({ project, currentUserId }: ProjectCardProps) {
-    const config = visibilityConfig[project.visibility as keyof typeof visibilityConfig]
+export function ProjectCard({ project }: ProjectCardProps) {
+    const config = visibilityConfig.PUBLIC
     const VisibilityIcon = config.icon
-
-    // 접근 권한 체크
-    const canView =
-        project.visibility === "PUBLIC" ||
-        (project.visibility === "INTERNAL" && currentUserId) ||
-        (project.visibility === "PRIVATE" && currentUserId === project.userId)
-
-    if (!canView) {
-        return null
-    }
-
-    const topics = project.topics ? JSON.parse(project.topics) : []
-    const showDetails = project.visibility !== "PRIVATE" || currentUserId === project.userId
+    const topics = project.tags || []
 
     return (
-        <Link href={`/projects/${project.id}`} className="block">
+        <a href={project.githubUrl} target="_blank" rel="noopener noreferrer" className="block">
             <Card className="group relative overflow-hidden hover:shadow-2xl transition-all duration-500 border-border/50 hover:border-violet-500/50 bg-gradient-to-br from-background to-muted/20 backdrop-blur-sm cursor-pointer">
-                {/* Gradient Overlay on Hover */}
                 <div className={`absolute inset-0 bg-gradient-to-br ${config.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none`} />
 
                 <CardHeader className="relative z-10">
@@ -63,8 +55,8 @@ export function ProjectCard({ project, currentUserId }: ProjectCardProps) {
                                     <ExternalLink className="w-4 h-4 opacity-0 group-hover/link:opacity-100 transition-opacity flex-shrink-0" />
                                 </div>
                             </CardTitle>
-                            <CardDescription className="text-sm flex items-center gap-2">
-                                <span className="truncate">by {project.user?.name || project.user?.githubLogin || "Unknown Member"}</span>
+                            <CardDescription className="text-sm">
+                                선학산연구소 프로젝트
                             </CardDescription>
                         </div>
 
@@ -82,7 +74,6 @@ export function ProjectCard({ project, currentUserId }: ProjectCardProps) {
                 </CardHeader>
 
                 <CardContent className="relative z-10">
-                    {/* 기술 스택 & 토픽 */}
                     <div className="flex flex-wrap gap-2 mb-4">
                         {project.language && (
                             <Badge variant="secondary" className="font-mono text-xs px-2.5 py-1 bg-gradient-to-r from-violet-500/10 to-fuchsia-500/10 border-violet-500/20">
@@ -100,20 +91,6 @@ export function ProjectCard({ project, currentUserId }: ProjectCardProps) {
                             </Badge>
                         )}
                     </div>
-
-                    {/* 통계 */}
-                    {showDetails && (
-                        <div className="flex items-center gap-5 text-sm text-muted-foreground">
-                            <div className="flex items-center gap-1.5 group/stat">
-                                <Star className="w-4 h-4 group-hover/stat:text-yellow-500 transition-colors" />
-                                <span className="font-medium">{project.stars}</span>
-                            </div>
-                            <div className="flex items-center gap-1.5 group/stat">
-                                <GitFork className="w-4 h-4 group-hover/stat:text-violet-500 transition-colors" />
-                                <span className="font-medium">{project.forks}</span>
-                            </div>
-                        </div>
-                    )}
                 </CardContent>
 
                 {project.featured && (
@@ -124,6 +101,6 @@ export function ProjectCard({ project, currentUserId }: ProjectCardProps) {
                     </CardFooter>
                 )}
             </Card>
-        </Link>
+        </a>
     )
 }
