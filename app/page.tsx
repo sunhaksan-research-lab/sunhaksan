@@ -37,17 +37,11 @@ export default function HomePage() {
           </p>
 
           <div className="flex gap-4 justify-center flex-wrap">
-            <Link href="/projects">
+            <Link href="https://github.com/sunhaksan-research-lab" target="_blank">
               <Button size="lg" className="text-base px-10 py-7 rounded-lg font-bold bg-foreground text-background hover:bg-foreground/90 transition-all">
-                <Rocket className="w-5 h-5 mr-3" />
-                Archive Access
-                <ArrowRight className="w-5 h-5 ml-3" />
-              </Button>
-            </Link>
-            <Link href="https://github.com/sunhaksan-research" target="_blank">
-              <Button size="lg" variant="outline" className="text-base px-10 py-7 rounded-lg border-2 hover:bg-accent transition-all">
                 <Github className="w-5 h-5 mr-3" />
                 GitHub Organization
+                <ArrowRight className="w-5 h-5 ml-3" />
               </Button>
             </Link>
           </div>
