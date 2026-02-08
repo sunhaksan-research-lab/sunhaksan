@@ -1,67 +1,21 @@
-import { auth } from "@/lib/auth"
-import { prisma } from "@/lib/prisma"
 import { ProjectCard } from "@/components/project-card"
 import { Button } from "@/components/ui/button"
-import { ArrowRight, Github, Sparkles, Rocket, Users } from "lucide-react"
+import { ArrowRight, Github, Sparkles, Rocket } from "lucide-react"
 import Link from "next/link"
+import { projects } from "@/data/content"
 
-export default async function HomePage() {
-  const session = await auth()
-
-  // 공개 및 주요 프로젝트 가져오기
-  const featuredProjects = await prisma.project.findMany({
-    where: {
-      featured: true,
-      visibility: "PUBLIC",
-    },
-    include: {
-      user: {
-        select: {
-          name: true,
-          githubLogin: true,
-        },
-      },
-    },
-    take: 6,
-    orderBy: {
-      updatedAt: "desc",
-    },
-  })
-
-  // 최신 프로젝트
-  const recentProjects = await prisma.project.findMany({
-    where: session
-      ? {
-        OR: [
-          { visibility: "PUBLIC" },
-          { visibility: "INTERNAL" },
-        ],
-      }
-      : { visibility: "PUBLIC" },
-    include: {
-      user: {
-        select: {
-          name: true,
-          githubLogin: true,
-        },
-      },
-    },
-    take: 6,
-    orderBy: {
-      updatedAt: "desc",
-    },
-  })
+export default function HomePage() {
+  const featuredProjects = projects.filter(p => p.featured)
+  const recentProjects = projects.slice(0, 6)
 
   return (
     <div className="min-h-screen">
-      {/* Hero Section with Enhanced Design */}
+      {/* Hero Section */}
       <section className="relative py-32 px-4 overflow-hidden">
-        {/* Animated Background Gradient */}
         <div className="absolute inset-0 bg-gradient-to-br from-violet-500/10 via-fuchsia-500/10 to-cyan-500/10 animate-gradient-xy" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(120,119,198,0.3),rgba(255,255,255,0))]" />
 
         <div className="container mx-auto max-w-6xl text-center relative z-10">
-          {/* Floating Badge */}
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-900/5 dark:bg-slate-100/5 border border-slate-900/10 dark:border-slate-100/10 mb-8 backdrop-blur-md">
             <Sparkles className="w-4 h-4 text-primary" />
             <span className="text-sm font-semibold tracking-tight text-foreground/80">
@@ -90,27 +44,24 @@ export default async function HomePage() {
                 <ArrowRight className="w-5 h-5 ml-3" />
               </Button>
             </Link>
-            {!session && (
-              <Link href="/api/auth/signin">
-                <Button size="lg" variant="outline" className="text-base px-10 py-7 rounded-lg border-2 hover:bg-accent transition-all">
-                  <Github className="w-5 h-5 mr-3" />
-                  Authorized Login
-                </Button>
-              </Link>
-            )}
+            <Link href="https://github.com/sunhaksan-research" target="_blank">
+              <Button size="lg" variant="outline" className="text-base px-10 py-7 rounded-lg border-2 hover:bg-accent transition-all">
+                <Github className="w-5 h-5 mr-3" />
+                GitHub Organization
+              </Button>
+            </Link>
           </div>
 
           {/* Stats */}
           <div className="mt-24 grid grid-cols-3 gap-12 max-w-3xl mx-auto py-12 border-y border-border/50">
             <div className="text-center">
               <div className="text-4xl font-bold tracking-tighter text-foreground">
-                {recentProjects.length}+
+                {projects.length}+
               </div>
               <div className="text-xs uppercase tracking-widest text-muted-foreground mt-2 font-bold">Projects</div>
             </div>
             <div className="text-center">
               <div className="text-4xl font-bold tracking-tighter text-foreground">
-                {/* Fallback for now */}
                 7+
               </div>
               <div className="text-xs uppercase tracking-widest text-muted-foreground mt-2 font-bold">Researchers</div>
@@ -155,7 +106,6 @@ export default async function HomePage() {
                 <ProjectCard
                   key={project.id}
                   project={project}
-                  currentUserId={session?.user?.id}
                 />
               ))}
             </div>
@@ -193,7 +143,6 @@ export default async function HomePage() {
                 <ProjectCard
                   key={project.id}
                   project={project}
-                  currentUserId={session?.user?.id}
                 />
               ))}
             </div>
@@ -205,21 +154,10 @@ export default async function HomePage() {
               <p className="text-lg text-muted-foreground mb-6">
                 아직 등록된 프로젝트가 없습니다
               </p>
-              {session && (
-                <Link href="/dashboard">
-                  <Button size="lg" className="bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-700 hover:to-fuchsia-700">
-                    <Sparkles className="w-4 h-4 mr-2" />
-                    첫 프로젝트 등록하기
-                    <ArrowRight className="w-4 h-4 ml-2" />
-                  </Button>
-                </Link>
-              )}
             </div>
           )}
         </div>
       </section>
-
-      {/* CTA Section - Removed for private service concept */}
     </div>
   )
 }
